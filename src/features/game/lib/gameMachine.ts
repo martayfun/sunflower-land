@@ -15,6 +15,7 @@ import { mint } from "../actions/mint";
 import { LimitedItem } from "../types/craftables";
 import { sync } from "../actions/sync";
 import { withdraw } from "../actions/withdraw";
+import { useTour } from "@reactour/tour";
 
 export type PastAction = GameEvent & {
   createdAt: Date;
@@ -91,6 +92,7 @@ export type MachineInterpreter = Interpreter<
 >;
 
 export function startGame(authContext: AuthContext) {
+  const { setIsOpen: openTour } = useTour();
   return createMachine<Context, BlockchainEvent, BlockchainState>({
     id: "gameMachine",
     initial: "loading",
@@ -130,7 +132,7 @@ export function startGame(authContext: AuthContext) {
           },
           onDone: {
             //target: authContext.sessionId ? "playing" : "readonly",
-            target: authContext.sessionId ? "playing" : "playing",
+            target: authContext.sessionId ? "onboarding" : "playing",
             actions: assign({
               state: (context, event) => event.data.state,
             }),
@@ -138,6 +140,17 @@ export function startGame(authContext: AuthContext) {
           onError: {
             target: "error",
           },
+        },
+      },
+      // TODO: Find a better place to trigger tour
+      onboarding: {
+        invoke: {
+          src: async () => {
+            openTour(true);
+          },
+        },
+        onDone: {
+          target: "playing",
         },
       },
       playing: {
@@ -164,7 +177,6 @@ export function startGame(authContext: AuthContext) {
         invoke: {
           src: async (context) => {
             const saveAt = new Date();
-
             if (context.actions.length > 0) {
               await autosave({
                 farmId: Number(authContext.farmId),
