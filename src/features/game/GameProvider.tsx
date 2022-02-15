@@ -10,6 +10,12 @@ import { cacheShortcuts, getShortcuts } from "features/hud/lib/shortcuts";
 
 import { startGame, MachineInterpreter } from "./lib/gameMachine";
 import { InventoryItemName } from "./types/game";
+import { inspect } from "@xstate/inspect";
+
+inspect({
+  url: 'https://statecharts.io/inspect', // (default)
+  iframe: false // open in new window
+});
 
 interface GameContext {
   shortcutItem: (item: InventoryItemName) => void;
@@ -23,7 +29,7 @@ export const GameProvider: React.FC = ({ children }) => {
   const { authService } = useContext(Auth.Context);
   const [authState] = useActor(authService);
 
-  const gameService = useInterpret(startGame(authState.context));
+  const gameService = useInterpret(startGame(authState.context), {devTools: true});
   const [shortcuts, setShortcuts] = useState<InventoryItemName[]>(
     getShortcuts()
   );
