@@ -18,10 +18,12 @@ import radish from "assets/icons/radish.png";
 import water from "assets/icons/expression_working.png";
 import token from "assets/icons/token.png";
 import timer from "assets/icons/timer.png";
+import { useTour } from "@reactour/tour";
 
 const NETWORK = import.meta.env.VITE_NETWORK;
 
 export const Menu = () => {
+  const { isOpen: tourIsOpen, setCurrentStep: setCurrentTourStep, setIsOpen: setTourIsOpen } = useTour()
   const { authService } = useContext(Auth.Context);
   const { gameService } = useContext(Context);
   const [authState] = useActor(authService);
@@ -37,6 +39,9 @@ export const Menu = () => {
 
   const handleMenuClick = () => {
     setMenuOpen(!menuOpen);
+    if (tourIsOpen) {
+      setCurrentTourStep(10)
+    }
   };
 
   const handleNavigationClick = (section: Section) => {
@@ -80,6 +85,11 @@ export const Menu = () => {
   }, []);
 
   const syncOnChain = async () => {
+    console.log(tourIsOpen) 
+    if (tourIsOpen) {
+      setTourIsOpen(false)
+     }
+    
     if (NETWORK === "mainnet") {
       setShowComingSoon(true);
       setMenuOpen(false);
@@ -91,14 +101,17 @@ export const Menu = () => {
 
   const autosave = async () => {
     gameService.send("SAVE");
+    if (tourIsOpen) {
+      setCurrentTourStep(9)
+    }
   };
 
   return (
-    <div ref={ref} className="fixed top-2 left-2 z-50 shadow-lg">
+    <div id="menu" ref={ref} className="fixed top-2 left-2 z-50 shadow-lg">
       <OuterPanel>
         <div className="flex justify-center p-1">
           <Button
-            className="mr-2 bg-brown-200 active:bg-brown-200"
+            className="mr-2 bg-brown-200 active:bg-brown-200 open-menu"
             onClick={handleMenuClick}
           >
             <img
@@ -108,7 +121,7 @@ export const Menu = () => {
             />
             <span className="hidden md:flex">Menu</span>
           </Button>
-          <Button onClick={autosave}>
+          <Button onClick={autosave} className="save">
             {gameState.matches("autosaving") ? (
               <img src={timer} className="animate-pulsate" alt="saving" />
             ) : (
@@ -150,7 +163,7 @@ export const Menu = () => {
             </li>
             <li className="p-1">
               {/* <Button onClick={syncOnChain}> */}
-              <Button onClick={syncOnChain}>
+              <Button onClick={syncOnChain} className="sync">
                 <span className="text-sm">Sync on chain</span>
               </Button>
             </li>
