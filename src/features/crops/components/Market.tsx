@@ -13,11 +13,22 @@ import { GRID_WIDTH_PX } from "features/game/lib/constants";
 import { Action } from "components/ui/Action";
 
 import { MarketItems } from "./MarketItems";
+import { useTour } from "@reactour/tour";
 
 export const Market: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { setCurrentStep: setCurrentTourStep, isOpen: tourIsOpen, currentStep: currentTourStep } = useTour()
+
+  const handleMarketClick = () => {
+    setIsOpen(true)
+    if (tourIsOpen && currentTourStep === 3) {
+      setCurrentTourStep(4)
+    }
+  }
+
   return (
     <div
+      id="open-shop"
       style={{
         width: `${GRID_WIDTH_PX * 3.2}px`,
         position: "absolute",
@@ -28,7 +39,7 @@ export const Market: React.FC = () => {
       <img
         src={market}
         alt="market"
-        onClick={() => setIsOpen(true)}
+        onClick={() =>  handleMarketClick()}
         className="cursor-pointer w-full hover:img-highlight"
       />
       <img
@@ -61,7 +72,7 @@ export const Market: React.FC = () => {
         className="absolute -bottom-3 left-6"
         text="Shop"
         icon={plant}
-        onClick={() => setIsOpen(true)}
+        onClick={() => handleMarketClick()}
       />
       <Modal centered show={isOpen} onHide={() => setIsOpen(false)}>
         <MarketItems onClose={() => setIsOpen(false)} />
